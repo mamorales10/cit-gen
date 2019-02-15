@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CIT Rapid Cyber Range</title>
+        <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    </head>
+
+    <body>
+        <h1 align="center">Welcome to CIT Rapid Cyber Range</h1>
+        <h3 align="center">Please connect to one of the following with remote desktop.</h3>
+
+        <table style="width:75%" border="1" cellpadding="5" cellspacing="5" align="center">
+        <thead>
+            <tr>
+                <th style="text-align: center">Workshop Name</th>
+                <th style="text-align: center">Number Available</th>
+                <th style="text-align: center">Materials</th>
+                <th style="text-align: center">Connection Link</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for workshop in workshops %}
+            <tr>
+                <td>
+                    <div style="text-align: center"> {{ workshop.workshopName }} </div>
+                </td>
+                <td>
+                    <div style="text-align: center"><span class="workshop_queue" id="{{ workshop.workshopName.replace(' ', '_') }}">{{ workshop.q.qsize() }}</span> workshops available! </div>
+                </td>
+                <td>
+                    {% for material in workshop.materials %}
+                        <div style="text-align: left"> -<a href="{{ material[0] }}" download>{{ material[1] }} </a> <br/> </div>
+                    {% endfor %}
+                </td>
+                <td>
+                    <div id = "download_links_{{ workshop.workshopName.replace(' ', '_') }}" style="text-align: center">
+                        <select id="dl_selector_{{ workshop.workshopName.replace(' ', '_') }}">
+                            <option value="/checkout/ms-rdp/{{ workshop.workshopName }}">Windows</option>
+                            <option value="/checkout/rdesktop/{{ workshop.workshopName }}">Linux</option>
+                        </select>
+                        <button id="dl_button_{{ workshop.workshopName }}"
+                                onclick="initiate_download('{{ workshop.workshopName }}');">Submit</button>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+
+        <script>
+            function initiate_download(workshopName) {
+                {#window.alert("worked");#}
+                window.open($("#dl_selector_" + workshopName.replace(/ /g, '_')).val(), "_self");
+            }
+
+            var socket = io.connect("http://" + window.location.hostname + ":" + {{ socket_io_port }});
+            socket.on('connect', function() {
+                socket.emit('connect');
+            });
+
+            socket.on('sizes', function(sizes) {
+                if (sizes[1] === 0)
+                    $('#download_links_' + sizes[0].replace(/ /g, '_')).hide();
+                else
+                    $('#download_links_' + sizes[0].replace(/ /g, '_')).show();
+                $('#' + sizes[0].replace(/ /g, '_')).text(sizes[1]);
+            });
+        </script>
+    </body>
+</html>

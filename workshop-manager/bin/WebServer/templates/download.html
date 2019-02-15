@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CIT Rapid Cyber Range</title>
+        <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    </head>
+
+    <body>
+        <h2 align="center">Your download will be available in:</h2>
+        <div id="myProgress">
+              <div id="myBar">0%</div>
+        </div>
+        <div id="countdown" style="text-align: center">
+            <span id="minutes">00</span>:<span id="seconds">00</span>
+        </div>
+        <div id="aftercount" style="display:none;text-align: center">Your download is available! Click to download!</div>
+
+        <div style="text-align: center">
+            <a href="../../{{ download_path }}" download>
+                <button id="download_button" disabled style="height:100px;width:200px">Download File</button>
+            </a>
+        </div>
+
+        <div id="instructions">
+            {% if download_type == "ms-rdp" and zip %}
+            <div>
+                <ol>
+                    <li>When download is available, click the download button.</li>
+                    <li>Select "Save file".</li>
+                    <img src="../../static/ms-rdp-instructions/save_zip.PNG">
+                    <li>Navgate using Windows File Explorer to where the .zip archive was saved.</li>
+                    <li>Extract the zip archive by right clicking the .zip file and then selecting "Extract all".</li>
+                    <img src="../../static/ms-rdp-instructions/extract_all.PNG">
+                    <li>A window will open up similar to the one below. Click  the "Extract" button.</li>
+                    <img src="../../static/ms-rdp-instructions/extract_window.PNG">
+                    <li>You will now see the extracted remote desktop files similar to below:</li>
+                    <img src="../../static/ms-rdp-instructions/extracted_files.PNG">
+                    <li>Double click on the remote desktop file corresponding to the machine you would like to connect to.<br>A dialogue window will open. Click "Connect".</li>
+                    <img src="../../static/ms-rdp-instructions/connect.PNG">
+                    <li>A warning dialogue window will open. Click "Yes".</li>
+                    <img src="../../static/ms-rdp-instructions/verified.PNG">
+                    <li>A Microsoft Remote Desktop Connection window should open and you should be connected!</li>
+                    <img src="../../static/ms-rdp-instructions/connected.PNG">
+                </ol>
+            </div>
+            {% endif %}
+
+            {% if download_type == "ms-rdp" and not zip %}
+            <div>
+                <ol>
+                    <li>When download is available, click the download button.</li>
+                    <li>Select "Open with" and ensure "Remote Desktop Connection" is selected.</li>
+                    <img src="../../static/ms-rdp-instructions/save_file.PNG">
+                    <li>Click "OK".</li>
+                    <li>A dialogue window will open. Click "Connect".</li>
+                    <img src="../../static/ms-rdp-instructions/connect.PNG">
+                    <li>A warning dialogue window will open. Click "Yes".</li>
+                    <img src="../../static/ms-rdp-instructions/verified.PNG">
+                    <li>A Microsoft Remote Desktop Connection window should open and you should be connected!</li>
+                    <img src="../../static/ms-rdp-instructions/connected.PNG">
+                </ol>
+            </div>
+            {% endif %}
+
+            {% if download_type == "rdesktop" and zip %}
+            <div>
+                <ol>
+                    *NOTE: You must have 'rdesktop' and 'unzip' installed already. ('unzip' is usually installed by default on Linux distributions)
+                    <li>When download is available, click the download button.</li>
+                    <li>Select "Save file".</li>
+                    <img src="../../static/rdesktop-instructions/save_zip.png">
+                    <li>Navgate using the command line to where the .zip archive was saved.</li>
+                    <li>Extract the zip archive by entering:<br><code>unzip <i>ZIP_You_Just_Downloaded.zip</i></code><br>This will extract the files into the same directory as the downloaded zip.</li>
+                    <li>Make the files executable by entering:<br><code>chmod 755 <i>Machine_1, Machine_2, .. , Machine_N</i></code></li>
+                    <li>Execute the script of the machine you would like to connect to by entering: <br><code>./Machine_You_Want_To_Connect_To</code></li>
+                    <li>rdesktop should have opened and you should have a window similar to the one below:</li>
+                    <img src="../../static/rdesktop-instructions/rdesktop_window.png">
+                </ol>
+            </div>
+            {% endif %}
+
+            {% if download_type == "rdesktop" and not zip %}
+            <div>
+                <ol>
+                    *NOTE: You must have 'rdesktop' installed already.
+                    <li>When download is available, click the download button.</li>
+                    <li>Select "Save file".</li>
+                    <img src="../../static/rdesktop-instructions/save_file.png">
+                    <li>Navigate using the command line to where the .sh script was saved.</li>
+                    <li>Make the file executable by entering:<br><code>chmod 755 <i>Script_You_Just_Downloaded</i></code></li>
+                    <li>Execute the script now by entering:<br><code>./Script_You_Just_Downloaded</code></li>
+                    <li>rdesktop should have opened and you should have a window similar to the one below:</li>
+                    <img src="../../static/rdesktop-instructions/rdesktop_window.png">
+                </ol>
+            </div>
+            {% endif %}
+        </div>
+
+        <script>
+            {# Fiddle from http://jsfiddle.net/ysilvestrov/bUZd8/1/ #}
+            var sTime = new Date().getTime();
+            var countDown = 5;
+            var downloadButton = document.getElementById("download_button");
+
+            function UpdateTime() {
+                var counter = setInterval(UpdateTime, 1000);
+                var cTime = new Date().getTime();
+                var diff = cTime - sTime;
+                var seconds = countDown - Math.floor(diff / 1000);
+                if (seconds >= 0) {
+                    var minutes = Math.floor(seconds / 60);
+                    seconds -= minutes * 60;
+                    $("#minutes").text(minutes < 10 ? "0" + minutes : minutes);
+                    $("#seconds").text(seconds < 10 ? "0" + seconds : seconds);
+                }
+                else {
+                    $("#countdown").hide();
+                    $("#aftercount").show();
+                    clearInterval(counter);
+                    downloadButton.innerHTML = "Download";
+                    downloadButton.removeAttribute('disabled');
+                }
+            }
+            UpdateTime();
+
+            {# Progress Bar from https://www.w3schools.com/w3css/w3css_progressbar.asp #}
+            function move() {
+                var elem = document.getElementById("myBar");
+                var width = 1;
+                var id = setInterval(frame, 50);
+                function frame() {
+                    if (width >= 100) {
+                        clearInterval(id);
+                    } else {
+                        width++;
+                        elem.style.width = width + '%';
+                        elem.innerHTML = width  + '%';
+                    }
+                }
+            }
+            move();
+        </script>
+    </body>
+</html>

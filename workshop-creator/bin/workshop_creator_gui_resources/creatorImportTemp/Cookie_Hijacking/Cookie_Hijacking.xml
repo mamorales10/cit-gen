@@ -1,0 +1,33 @@
+<xml>
+  <vbox-setup>
+    <path-to-vboxmanage>/usr/bin/vboxmanage</path-to-vboxmanage>
+  </vbox-setup>
+  <testbed-setup>
+    <network-config>
+      <ip-address>127.0.0.1</ip-address>
+    </network-config>
+    <vm-set>
+      <base-groupname>Cookie_Hijacking</base-groupname>
+      <num-clones>2</num-clones>
+      <clone-snapshots>true</clone-snapshots>
+      <linked-clones>true</linked-clones>
+      <base-outname>101</base-outname>
+      <vrdp-baseport>1011</vrdp-baseport>
+      <vm>
+        <name>Attacker</name>
+        <vrdp-enabled>true</vrdp-enabled>
+        <internalnet-basename>intnet</internalnet-basename>
+      </vm>
+      <vm>
+        <name>Victim</name>
+        <vrdp-enabled>false</vrdp-enabled>
+        <internalnet-basename>intnet</internalnet-basename>
+      </vm>
+      <vm>
+        <name>Server</name>
+        <vrdp-enabled>true</vrdp-enabled>
+        <internalnet-basename>intnet</internalnet-basename>
+      </vm>
+    </vm-set>
+  </testbed-setup>
+</xml>
