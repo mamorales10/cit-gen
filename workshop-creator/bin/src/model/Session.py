@@ -459,9 +459,17 @@ class Session:
                 vm_element = etree.SubElement(vm_set_element, "vm")
                 etree.SubElement(vm_element, "name").text = vm.name
                 etree.SubElement(vm_element, "vrdp-enabled").text = vm.vrdpEnabled
-                for internalnet in vm.internalnetBasenameList:
-                    logging.debug("hardSave(): adding internalnet-basename: " + internalnet)
-                    etree.SubElement(vm_element, "internalnet-basename").text = internalnet
+                
+                if(len(vm.internalnetBasenameList) > 0):
+                    for internalnet in vm.internalnetBasenameList:
+                        logging.debug("hardSave(): adding internalnet-basename: " + internalnet)
+                        etree.SubElement(vm_element, "internalnet-basename").text = internalnet
+                if(len(vm.genericDriverList) > 0):
+                    for genericDriver in vm.genericDriverList:
+                        logging.debug("hardSave(): adding generic-driver: " + genericDriver)
+                        etree.SubElement(vm_element, "generic-driver").text = genericDriver
+
+
 
             self.holdDirectory = os.path.join(WORKSHOP_MATERIAL_DIRECTORY, workshop.baseGroupName)
             if not os.path.exists(self.holdDirectory):
