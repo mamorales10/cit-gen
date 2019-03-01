@@ -42,11 +42,19 @@ for vm in vmset.findall('vm'):
             print "VM not found: ", vmname
             print "Exiting"
             exit()
-        internalnets = vm.findall('internalnet-basename')
-        internalnetNames = []
-        for internalnet in internalnets:
-            internalnetNames.append(internalnet.text+ myBaseOutname + str(i))
-        print "Internal net names: ", internalnetNames
+        
+        if len(vm.findall('internalnet-basename')) > 0:
+            print internalnets
+            internalnetNames = []
+            for internalnet in internalnets:
+                internalnetNames.append(internalnet.text+ myBaseOutname + str(i))
+            print "Internal net names: ", internalnetNames
+        else:
+            generic_drivers = vm.findall('generic-driver')
+            generic_driver_names = []
+            for generic_driver in generic_drivers:
+                generic_driver_names.append(generic_driver.text + str(i))
+            print "Generic Driver names: ", generic_driver_names
 
         # clone the vm and give it a name ending with myBaseOutname
         cloneCmd = [pathToVirtualBox, "clonevm", vmname, "--register"]
@@ -85,15 +93,17 @@ for vm in vmset.findall('vm'):
 
         # internal network setup
         netNum = 1
-        for internalnetName in internalnetNames:		
-            intNetCmd = [pathToVirtualBox, "modifyvm", newvmName, "--nic"+str(netNum), "intnet", "--intnet"+str(netNum), internalnetName]
-            print("\nsetting up internal network adapter")
-            print("executing: ")
-            print(intNetCmd)
-            result = subprocess.check_output(intNetCmd)
-            netNum+=1
-            # commented out the next line because an error about non-mutable state is reported even thought it still completes successfully
-            # print(result)
+        if len(vm.findall('internalnet-basename')) > 0:
+
+            for internalnetName in internalnetNames:		
+                intNetCmd = [pathToVirtualBox, "modifyvm", newvmName, "--nic"+str(netNum), "intnet", "--intnet"+str(netNum), internalnetName]
+                print("\nsetting up internal network adapter")
+                print("executing: ")
+                print(intNetCmd)
+                result = subprocess.check_output(intNetCmd)
+                netNum+=1
+                # commented out the next line because an error about non-mutable state is reported even thought it still completes successfully
+                # print(result)
 
         # for some reason, the vms aren't placed into a group unless we execute an additional modify command
         try:
